@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>World Clock 🎃</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <p class="eyebrow">🦇 Halloween Edition 🦇</p>
+    <h1>🎃 Đồng hồ thế giới</h1>
+    <p id="local-info"></p>
+  </header>
+
+  <section class="toolbar">
+    <div class="search-wrap">
+      <input id="search" type="search" placeholder="Tìm thành phố bất kỳ..." autocomplete="off">
+      <div id="search-results" class="search-results" hidden></div>
+    </div>
+  </section>
+
+  <main id="groups"></main>
+
+  <footer>Chạy hoàn toàn trên trình duyệt, không cần đăng nhập · Dữ liệu múi giờ theo thủ đô &amp; trung tâm tài chính lớn của từng quốc gia</footer>
+
+  <script src="cities.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

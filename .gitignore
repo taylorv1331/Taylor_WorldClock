@@ -1,0 +1,5 @@
+.DS_Store
+
+# Các project khác không thuộc repo world-clock này
+CusManagementApp/
+cus-management-api/
