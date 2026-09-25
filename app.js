@@ -9,9 +9,29 @@ const store = {
 };
 
 const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-let added = new Set(store.get("added", [])); // id của các thành phố người dùng đã bấm "Thêm"
+let added = new Set(store.get("added", [])); // id của các thành phố người dùng đã bấm "Thêm" (vốn không nổi bật)
+let hidden = new Set(store.get("hidden", [])); // id của các thành phố nổi bật đã bị bấm xoá
 let query = "";
 let searchOpen = false;
+
+// một thành phố có đang hiển thị trên giao diện hay không
+function isVisible(c) {
+  if (hidden.has(c.id)) return false;
+  return c.featured || added.has(c.id);
+}
+function showCity(id) {
+  const c = byId.get(id);
+  hidden.delete(id);
+  if (!c.featured) added.add(id);
+  store.set("hidden", [...hidden]);
+  store.set("added", [...added]);
+}
+function hideCity(id) {
+  const c = byId.get(id);
+  if (c.featured) hidden.add(id); else added.delete(id);
+  store.set("hidden", [...hidden]);
+  store.set("added", [...added]);
+}
 
 const byId = new Map(CITIES.map((c) => [c.id, c]));
 const TYPE_LABEL = { capital: "Thủ đô", financial: "Trung tâm tài chính" };
@@ -92,10 +112,10 @@ function clockSvg() {
 // ---------- Xây khung nhóm theo châu lục ----------
 const cardIndex = new Map(); // id -> { el, tz, hour, minute, second, svg }
 
-function cityCardHtml(city, removable) {
+function cityCardHtml(city) {
   return `
     <article class="card" data-id="${city.id}">
-      ${removable ? `<button class="remove" type="button" aria-label="Bỏ ${city.name}">×</button>` : ""}
+      <button class="remove" type="button" aria-label="Bỏ ${city.name}">×</button>
       ${clockSvg()}
       <h3>${city.name}</h3>
       <p class="country">${city.country}</p>
@@ -110,18 +130,16 @@ function buildGroups() {
 
   for (const cont of CONTINENTS) {
     const cities = CITIES.filter((c) => c.continent === cont.key);
-    const featured = cities.filter((c) => c.featured);
-    const addedCities = cities.filter((c) => !c.featured && added.has(c.id));
+    const visible = cities.filter(isVisible);
 
     const section = document.createElement("section");
     section.className = "continent";
     section.dataset.key = cont.key;
     section.innerHTML = `
       <h2 class="continent-title"><span class="c-icon">${cont.icon}</span>${cont.label}</h2>
-      <div class="grid">
-        ${featured.map((c) => cityCardHtml(c, false)).join("")}
-        ${addedCities.map((c) => cityCardHtml(c, true)).join("")}
-      </div>`;
+      ${visible.length
+        ? `<div class="grid">${visible.map((c) => cityCardHtml(c)).join("")}</div>`
+        : `<p class="empty-group">Chưa có thành phố nào — dùng thanh tìm kiếm để thêm.</p>`}`;
     groupsEl.appendChild(section);
 
     section.querySelectorAll(".card").forEach((el) => {
@@ -131,10 +149,8 @@ function buildGroups() {
         hour: el.querySelector(".hour"), minute: el.querySelector(".minute"), second: el.querySelector(".second"),
         svg: el.querySelector(".dial"),
       });
-      const rm = el.querySelector(".remove");
-      if (rm) rm.addEventListener("click", () => {
-        added.delete(city.id);
-        store.set("added", [...added]);
+      el.querySelector(".remove").addEventListener("click", () => {
+        hideCity(city.id);
         buildGroups();
         renderCards();
         renderSearch();
@@ -185,7 +201,7 @@ function renderSearch() {
     const p = parts(c.tz, now);
     const timeText = `${String(p.h).padStart(2, "0")}:${String(p.m).padStart(2, "0")}`;
     const contLabel = CONTINENTS.find((k) => k.key === c.continent)?.label ?? "";
-    const already = c.featured || added.has(c.id);
+    const already = isVisible(c);
     return `
       <div class="result-row" data-id="${c.id}">
         <div class="r-info">
@@ -201,8 +217,7 @@ function renderSearch() {
 
   searchResults.querySelectorAll(".r-add").forEach((btn) => {
     btn.addEventListener("click", () => {
-      added.add(btn.dataset.id);
-      store.set("added", [...added]);
+      showCity(btn.dataset.id);
       buildGroups();
       renderCards();
       renderSearch();

@@ -86,6 +86,8 @@ h1::after { content:""; display:block; width:140px; height:3px; margin:14px auto
 }
 .remove:hover { color:var(--orange-light); border-color:var(--orange); }
 
+.empty-group { margin:0; padding:18px; text-align:center; color:var(--muted); font-style:italic; font-size:.85rem; border:1px dashed var(--border); border-radius:10px; }
+
 /* Đồng hồ */
 .dial { width:100%; max-width:200px; height:auto; display:block; margin:4px auto 0; filter:drop-shadow(0 6px 10px rgba(0,0,0,.55)); }
 .bezel { fill:var(--orange-deep); }
@@ -117,5 +119,21 @@ footer { text-align:center; color:var(--muted); font-size:.85rem; margin-top:36p
 
 @media (max-width:480px) {
   h1 { font-size:1.7rem; }
-  .grid { grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); }
+}
+
+/* Di động: 3 đồng hồ mỗi hàng, thu nhỏ mọi thứ tương ứng */
+@media (max-width:640px) {
+  body { padding:20px 10px 40px; }
+  .grid { grid-template-columns:repeat(3, 1fr); gap:8px; }
+  .card { padding:8px 4px 8px; border-radius:8px; }
+  .card h3 { margin:6px 0 0; font-size:.68rem; line-height:1.2; }
+  .country { font-size:.5rem; letter-spacing:.06em; }
+  .date { margin:4px 0 0; font-size:.56rem; }
+  .meta { margin:3px 0 0; font-size:.5rem; gap:3px; flex-wrap:wrap; }
+  .remove { width:16px; height:16px; line-height:14px; font-size:.72rem; top:3px; right:3px; }
+  .dial { max-width:100%; }
+  /* Ẩn số La Mã ở kích thước nhỏ vì không đủ chỗ đọc rõ, giữ vạch giờ để vẫn xem được giờ */
+  .num { display:none; }
+  .tick.major { stroke-width:3; }
+  .continent-title { font-size:1rem; gap:6px; }
 }
